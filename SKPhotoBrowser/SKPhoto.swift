@@ -100,27 +100,28 @@ open class SKPhoto: NSObject, SKPhotoProtocol {
                 guard let self = self else { return }
                 defer { session.finishTasksAndInvalidate() }
 
-                guard error == nil else {
+                guard error == nil,
+                      let data = data,
+                      let response = response,
+                      let image = UIImage.animatedImage(withAnimatedGIFData: data) else {
+                    // Always notify completion (even on failure) so the loading indicator stops
                     DispatchQueue.main.async {
                         self.loadUnderlyingImageComplete()
                     }
                     return
                 }
 
-                if let data = data, let response = response, let image = UIImage.animatedImage(withAnimatedGIFData: data) {
-                    if self.shouldCachePhotoURLImage {
-                        if SKCache.sharedCache.imageCache is SKRequestResponseCacheable {
-                            SKCache.sharedCache.setImageData(data, response: response, request: task?.originalRequest)
-                        } else {
-                            SKCache.sharedCache.setImage(image, forKey: self.photoURL)
-                        }
-                    }
-                    DispatchQueue.main.async {
-                        self.underlyingImage = image
-                        self.loadUnderlyingImageComplete()
+                if self.shouldCachePhotoURLImage {
+                    if SKCache.sharedCache.imageCache is SKRequestResponseCacheable {
+                        SKCache.sharedCache.setImageData(data, response: response, request: task?.originalRequest)
+                    } else {
+                        SKCache.sharedCache.setImage(image, forKey: self.photoURL)
                     }
                 }
-                
+                DispatchQueue.main.async {
+                    self.underlyingImage = image
+                    self.loadUnderlyingImageComplete()
+                }
             })
             task?.resume()
     }

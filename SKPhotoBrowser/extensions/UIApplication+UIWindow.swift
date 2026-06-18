@@ -14,10 +14,21 @@ internal extension UIApplication {
         // unwrap it twice to be sure the window is not nil
         if let appWindow = UIApplication.shared.delegate?.window, let window = appWindow {
             return window
-        } else if let window = UIApplication.shared.keyWindow {
-            return window
         }
 
-        return nil
+        // On iOS 13+ the app may use multiple scenes, so prefer the active
+        // foreground scene's key window before falling back to the deprecated API.
+        if #available(iOS 13.0, *) {
+            let windows = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .filter { $0.activationState == .foregroundActive }
+                .flatMap { $0.windows }
+
+            if let keyWindow = windows.first(where: { $0.isKeyWindow }) ?? windows.first {
+                return keyWindow
+            }
+        }
+
+        return UIApplication.shared.keyWindow
     }
 }

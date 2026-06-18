@@ -89,10 +89,13 @@ open class SKPhotoBrowser: UIViewController {
         self.init(nibName: nil, bundle: nil)
         self.photos = photos
         //self.photos.forEach { $0.checkCache() }
-        self.currentPageIndex = min(initialPageIndex, photos.count - 1)
+        // Guard against an empty photos array to avoid an out-of-bounds crash
+        self.currentPageIndex = max(0, min(initialPageIndex, photos.count - 1))
         self.initPageIndex = self.currentPageIndex
-        animator.senderOriginImage = photos[currentPageIndex].underlyingImage
-        animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
+        if !photos.isEmpty {
+            animator.senderOriginImage = photos[currentPageIndex].underlyingImage
+            animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
+        }
     }
     
     func setup() {
@@ -236,12 +239,11 @@ open class SKPhotoBrowser: UIViewController {
         }
         
         var activityItems: [AnyObject] = [underlyingImage]
-        if photo.caption != nil && includeCaption {
+        if let caption = photo.caption, includeCaption {
             if let shareExtraCaption = SKPhotoBrowserOptions.shareExtraCaption {
-                let caption = photo.caption ?? "" + shareExtraCaption
-                activityItems.append(caption as AnyObject)
+                activityItems.append((caption + shareExtraCaption) as AnyObject)
             } else {
-                activityItems.append(photo.caption as AnyObject)
+                activityItems.append(caption as AnyObject)
             }
         }
         
@@ -281,7 +283,7 @@ public extension SKPhotoBrowser {
 
 public extension SKPhotoBrowser {
     func initializePageIndex(_ index: Int) {
-        let i = min(index, photos.count - 1)
+        let i = max(0, min(index, photos.count - 1))
         currentPageIndex = i
         
         if isViewLoaded {
@@ -381,11 +383,10 @@ internal extension SKPhotoBrowser {
     }
     
     func getImageFromView(_ sender: UIView) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(sender.frame.size, true, 0.0)
-        sender.layer.render(in: UIGraphicsGetCurrentContext()!)
-        let result = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return result!
+        let renderer = UIGraphicsImageRenderer(size: sender.frame.size)
+        return renderer.image { context in
+            sender.layer.render(in: context.cgContext)
+        }
     }
 }
 
@@ -558,10 +559,6 @@ private extension SKPhotoBrowser {
     func configurePagingScrollView() {
         pagingScrollView.delegate = self
         view.addSubview(pagingScrollView)
-        
-        if SKPhotoBrowserOptions.protectScreenshot {
-            paginationView.protectScreenshot()
-        }
     }
 
     func configureGestureControl() {
@@ -584,6 +581,10 @@ private extension SKPhotoBrowser {
     func configurePaginationView() {
         paginationView = SKPaginationView(frame: view.frame, browser: self)
         view.addSubview(paginationView)
+        
+        if SKPhotoBrowserOptions.protectScreenshot {
+            paginationView.protectScreenshot()
+        }
     }
     
     func configureToolbar() {

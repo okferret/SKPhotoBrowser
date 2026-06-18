@@ -15,13 +15,25 @@ build/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata
+xcuserdata/
 *.xccheckout
 *.moved-aside
-DerivedData
+DerivedData/
 *.hmap
 *.ipa
+*.dSYM.zip
+*.dSYM
 *.xcuserstate
+*.xcscmblueprint
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+.build/
+.swiftpm/
+Packages/
+Package.resolved
 
 # CocoaPods
 #
