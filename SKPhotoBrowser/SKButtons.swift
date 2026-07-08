@@ -45,6 +45,8 @@ class SKButton: UIButton {
     func updateFrame(_ frameSize: CGSize) { }
 }
 
+
+
 class SKImageButton: SKButton {
     fileprivate var imageName: String { return "" }
 
@@ -57,6 +59,29 @@ class SKImageButton: SKButton {
         setup(imageName)
         showFrame = CGRect(x: marginX, y: marginY, width: size.width, height: size.height)
         hideFrame = CGRect(x: marginX, y: -marginY, width: size.width, height: size.height)
+        defer {
+            if let imageView = imageView {
+                bringSubviewToFront(imageView)
+            }
+            if let titleLabel = titleLabel {
+                bringSubviewToFront(titleLabel)
+            }
+        }
+        
+        let backgroundView: UIView = .init(frame: .zero)
+        insertSubview(backgroundView, at: 0)
+        backgroundView.isUserInteractionEnabled = false
+        backgroundView.backgroundColor = .black.withAlphaComponent(0.2)
+        backgroundView.layer.cornerRadius = 16.0
+        backgroundView.layer.masksToBounds = true
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            backgroundView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            backgroundView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            backgroundView.heightAnchor.constraint(equalToConstant: 32.0),
+            backgroundView.widthAnchor.constraint(equalToConstant: 32.0),
+        ])
+        
     }
 }
 

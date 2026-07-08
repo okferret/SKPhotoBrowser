@@ -36,6 +36,27 @@ class SKPaginationView: UIView {
         setupNextButton()
         
         update(browser?.currentPageIndex ?? 0)
+        
+        if let prevButton = prevButton, let nextButton = nextButton {
+            let backgroundView: UIView = .init(frame: .zero)
+            insertSubview(backgroundView, at: 0)
+            backgroundView.isUserInteractionEnabled = false
+            backgroundView.layer.cornerRadius = 16.0
+            backgroundView.layer.masksToBounds = true
+            backgroundView.backgroundColor = .black.withAlphaComponent(0.2)
+            backgroundView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                backgroundView.centerYAnchor.constraint(equalTo: prevButton.centerYAnchor),
+                backgroundView.leftAnchor.constraint(equalTo: prevButton.leftAnchor, constant: 5.0),
+                backgroundView.rightAnchor.constraint(equalTo: nextButton.rightAnchor, constant: -5.0),
+                backgroundView.heightAnchor.constraint(equalToConstant: 32.0)
+            ])
+            bringSubviewToFront(prevButton)
+            bringSubviewToFront(nextButton)
+        }
+        if let counterLabel = counterLabel {
+            bringSubviewToFront(counterLabel)
+        }
     }
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -92,8 +113,8 @@ private extension SKPaginationView {
         label.center = CGPoint(x: frame.width / 2, y: frame.height / 2)
         label.textAlignment = .center
         label.backgroundColor = .clear
-        label.shadowColor = SKToolbarOptions.textShadowColor
-        label.shadowOffset = CGSize(width: 0.0, height: 1.0)
+        // label.shadowColor = SKToolbarOptions.textShadowColor
+        // label.shadowOffset = CGSize(width: 0.0, height: 1.0)
         label.font = SKToolbarOptions.font
         label.textColor = SKToolbarOptions.textColor
         label.translatesAutoresizingMaskIntoConstraints = true

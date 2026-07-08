@@ -394,23 +394,25 @@ internal extension SKPhotoBrowser {
 
 internal extension SKPhotoBrowser {
     func frameForToolbarAtOrientation() -> CGRect {
-        let offset: CGFloat = {
-            if #available(iOS 11.0, *) {
-                return view.safeAreaInsets.bottom
-            } else {
-                return 15
-            }
-        }()
+//        let offset: CGFloat = {
+//            if #available(iOS 11.0, *) {
+//                return view.safeAreaInsets.bottom
+//            } else {
+//                return 15
+//            }
+//        }()
+//        
+//        let height: CGFloat = {
+//            if #available(iOS 26.0, *) {
+//                return 48
+//            } else {
+//                return 44
+//            }
+//        }()
+//        
+//        return view.bounds.divided(atDistance: height, from: .maxYEdge).slice.offsetBy(dx: 0, dy: -offset)
         
-        let height: CGFloat = {
-            if #available(iOS 26.0, *) {
-                return 48
-            } else {
-                return 44
-            }
-        }()
-        
-        return view.bounds.divided(atDistance: height, from: .maxYEdge).slice.offsetBy(dx: 0, dy: -offset)
+        return .init(x: 0.0, y: view.bounds.height - 100.0, width: view.bounds.width, height: 100.0)
     }
     
     func frameForPaginationAtOrientation() -> CGRect {
